@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">CaseStudy</string>
+    <string name="label_high_score">Highest Score :</string>
+    <string name="label_game_start">Start Game</string>
 </resources>
