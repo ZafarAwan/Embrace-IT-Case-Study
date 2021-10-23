@@ -24,8 +24,8 @@ class MainViewModel @Inject constructor(private val mainRepository: MainReposito
         questionStateFlow.value = ApiState.Loading
         mainRepository.getQuestionsData().catch { e ->
             questionStateFlow.value = ApiState.Failure(e)
-        }.collect { data ->
-            questionStateFlow.value = ApiState.Success(data)
+        }.collect {
+            questionStateFlow.value = ApiState.Success(it)
         }
     }
 }
