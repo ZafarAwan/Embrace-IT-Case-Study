@@ -4,4 +4,9 @@
     <string name="label_game_start">Start Game</string>
     <string name="label_quiz">Quiz :</string>
     <string name="label_score">Your Score :</string>
+
+    <string name="label_finish">Finish</string>
+    <string name="label_end_question">Do you want to restart the quiz?</string>
+    <string name="label_restart">Restart</string>
+    <string name="label_question_score">Score:</string>
 </resources>

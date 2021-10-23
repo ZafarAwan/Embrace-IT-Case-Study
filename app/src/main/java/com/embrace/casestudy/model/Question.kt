@@ -11,4 +11,4 @@ data class Question(
     val questionImageUrl: String?,
     val score: Int?,
     val type: String?
-):Parcelable
+) : Parcelable
