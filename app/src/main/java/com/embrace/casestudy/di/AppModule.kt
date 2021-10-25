@@ -1,10 +1,15 @@
 package com.embrace.casestudy.di
 
+import android.content.Context
+import androidx.room.Room
 import com.embrace.casestudy.network.ApiService
 import com.embrace.casestudy.utils.NetworkComponents
+import com.test.newimplementation.Network.RoomDataBase
+import com.test.newimplementation.Network.RoomQuizDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -35,4 +40,10 @@ object AppModule {
             .client(okHttpClient.build())
             .build()
             .create(ApiService::class.java)
+
+
+    @Singleton
+    @Provides
+    fun getRoomDb(@ApplicationContext context: Context) : RoomQuizDao =
+        Room.databaseBuilder(context, RoomDataBase::class.java,"RoomDb").build().getQuestionDao()
 }

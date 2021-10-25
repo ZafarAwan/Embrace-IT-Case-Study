@@ -7,6 +7,9 @@
 
     <string name="label_finish">Finish</string>
     <string name="label_end_question">Do you want to restart the quiz?</string>
-    <string name="label_restart">Restart</string>
+    <string name="label_ok">OK</string>
     <string name="label_question_score">Score:</string>
+
+    <string name="alert">Alert</string>
+    <string name="no_Internet">Please check your internet connection and try again.</string>
 </resources>

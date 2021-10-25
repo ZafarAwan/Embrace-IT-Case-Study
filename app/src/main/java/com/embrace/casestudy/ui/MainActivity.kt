@@ -8,9 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.embrace.casestudy.R
 import com.embrace.casestudy.databinding.ActivityMainBinding
+import com.embrace.casestudy.model.Question
+import com.embrace.casestudy.model.QuestionAnswerListDB
 import com.embrace.casestudy.model.QuestionAnswers
+import com.embrace.casestudy.model.TopScores
 import com.embrace.casestudy.utils.ApiState
+import com.embrace.casestudy.utils.NetworkComponents
 import com.embrace.casestudy.viewModel.MainViewModel
+import com.embrace.casestudy.viewModel.RoomViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 
@@ -20,17 +25,38 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private val mainViewModel: MainViewModel by viewModels()
+    private val mainRoomViewModel: RoomViewModel by viewModels()
 
     private lateinit var question: QuestionAnswers
+    private var topScores: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initMainView()
+        mainRoomViewModel.questionList.observe(this) {
+            if (it == null) {
+                if (NetworkComponents.DETECT_INTERNET_CONNECTION(this)) {
+                    mainViewModel.getQuestionList()
+                } else {
+                    NetworkComponents.showDialog(this)
+                }
+            } else {
+                var questionAnswers = QuestionAnswers(it.questionList)
+                question = questionAnswers
+            }
+        }
 
-        mainViewModel.getQuestionList()
+        mainRoomViewModel.topScores.observe(this) {
+            if (it == null) {
+                var topString = TopScores(0, 0)
+                mainRoomViewModel.insertSingleScore(topString)
+            } else {
+                topScores = it.topScore
+                scoreViewUpdate()
+            }
+        }
 
         lifecycleScope.launchWhenStarted {
             mainViewModel._questionStateFlow.collect {
@@ -44,6 +70,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     is ApiState.Success -> {
                         question = it.data
+                        addDataInRoomDataBase(it.data.questionList)
+
                     }
                     is ApiState.Empty -> {
 
@@ -51,20 +79,31 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        initMainView()
     }
 
+    private fun addDataInRoomDataBase(questionList: List<Question>) {
+        var questionAnswerListDB = QuestionAnswerListDB(0, questionList)
+        mainRoomViewModel.insertAll(questionAnswerListDB)
+    }
 
     private fun initMainView() {
-
         binding.tvTitle.text = resources.getString(R.string.app_name)
-        binding.tvHighScores.text = "00"
+        scoreViewUpdate()
 
         binding.btnStart.setOnClickListener {
             val intent = Intent(this, QuestionAnswerActivity::class.java)
             val bundle = Bundle()
-            bundle.putParcelable("questionList", question)
-            intent.putExtra("Bundle", bundle)
+            bundle.putParcelable(NetworkComponents.questionList, question)
+            bundle.putInt(NetworkComponents.topScore, topScores)
+            intent.putExtra(NetworkComponents.bundle, bundle)
+
             startActivity(intent)
         }
+    }
+
+    private fun scoreViewUpdate() {
+        binding.tvHighScores.text = "$topScores"
     }
 }

@@ -14,7 +14,8 @@
         android:weightSum="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:baselineAligned="false">
 
 
         <LinearLayout
@@ -28,6 +29,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:fontFamily="@font/poppins_regular"
                 android:gravity="center"
                 android:text="@string/label_quiz"
                 android:textColor="@color/white"
@@ -37,6 +39,7 @@
                 android:id="@+id/tvQuizNo"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:fontFamily="@font/poppins_regular"
                 android:gravity="center"
                 android:textColor="@color/white"
                 android:textSize="18sp" />
@@ -54,6 +57,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:fontFamily="@font/poppins_regular"
                 android:gravity="center"
                 android:text="@string/label_score"
                 android:textColor="@color/white"
@@ -63,6 +67,7 @@
                 android:id="@+id/tvYScore"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:fontFamily="@font/poppins_regular"
                 android:gravity="center"
                 android:textColor="@color/white"
                 android:textSize="18sp" />
@@ -96,6 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="3dp"
+            android:fontFamily="@font/poppins_regular"
             android:gravity="center_vertical"
             android:textColor="@color/white"
             android:textSize="15sp" />
@@ -139,6 +145,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/poppins_regular"
                             android:gravity="center_vertical"
                             android:text="@string/label_question_score"
                             android:textColor="@color/black"
@@ -148,6 +155,7 @@
                             android:id="@+id/tvQScore"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/poppins_regular"
                             android:gravity="center_vertical"
                             android:text=""
                             android:textColor="@color/black"
@@ -159,6 +167,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
+                        android:fontFamily="@font/poppins_regular"
                         android:gravity="center_vertical"
                         android:textColor="@color/black"
                         android:textSize="18sp"
@@ -189,29 +198,34 @@
                 <TextView
                     android:id="@+id/tvAnswerOne"
                     style="@style/OptionStyle"
+                    android:fontFamily="@font/poppins_regular"
                     android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tvAnswerTwo"
                     style="@style/OptionStyle"
+                    android:fontFamily="@font/poppins_regular"
                     android:visibility="gone" />
 
 
                 <TextView
                     android:id="@+id/tvAnswerThree"
                     style="@style/OptionStyle"
+                    android:fontFamily="@font/poppins_regular"
                     android:visibility="gone" />
 
 
                 <TextView
                     android:id="@+id/tvAnswerFour"
                     style="@style/OptionStyle"
+                    android:fontFamily="@font/poppins_regular"
                     android:visibility="gone" />
 
 
                 <TextView
                     android:id="@+id/tvAnswerFive"
                     style="@style/OptionStyle"
+                    android:fontFamily="@font/poppins_regular"
                     android:visibility="gone" />
 
             </LinearLayout>

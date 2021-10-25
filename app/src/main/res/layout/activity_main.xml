@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="?actionBarSize"
         android:background="@color/color_header"
+        android:fontFamily="@font/poppins_bold"
         android:gravity="center"
         android:textColor="@color/white"
         android:textSize="18sp"
@@ -39,6 +40,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_semibold"
                 android:gravity="center"
                 android:text="@string/label_high_score"
                 android:textColor="@color/white"
@@ -50,6 +52,7 @@
                 android:id="@+id/tvHighScores"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_semibold"
                 android:gravity="center"
                 android:textColor="@color/white"
                 android:textSize="20sp"
@@ -59,11 +62,12 @@
 
         <Button
             android:id="@+id/btnStart"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="30dp"
             android:background="@drawable/bg_round"
-            android:padding="10dp"
+            android:fontFamily="@font/poppins_regular"
+            android:padding="5dp"
             android:text="@string/label_game_start"
             android:textColor="@color/white"
             android:textSize="18sp" />

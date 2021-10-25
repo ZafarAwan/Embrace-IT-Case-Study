@@ -5,5 +5,5 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class QuestionAnswers(@SerializedName("questions") var questionList: ArrayList<Question>):Parcelable
+data class QuestionAnswers(@SerializedName("questions") var questionList: List<Question>):Parcelable
 

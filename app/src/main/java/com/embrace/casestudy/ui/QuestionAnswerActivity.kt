@@ -4,24 +4,31 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.embrace.casestudy.R
 import com.embrace.casestudy.databinding.ActivityQuestionAnswersBinding
 import com.embrace.casestudy.model.Question
 import com.embrace.casestudy.model.QuestionAnswers
+import com.embrace.casestudy.model.TopScores
+import com.embrace.casestudy.utils.NetworkComponents
+import com.embrace.casestudy.viewModel.RoomViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
 
-    private lateinit var questionList: ArrayList<Question>
+    private lateinit var questionList: List<Question>
     private lateinit var binding: ActivityQuestionAnswersBinding
     private lateinit var counterDownTimer: CountDownTimer
     private var count = 0    //use for iteration the list of questions
     private var yScore = 0   //use for score of current user
 
-    private var answerMultiple: ArrayList<String> = ArrayList()
     private var progressCount = 0
+    private val mainRoomViewModel: RoomViewModel by viewModels()
+    private var topScore: Int? = 0 //top score of quiz
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,14 +45,22 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
         binding.tvAnswerFive.setOnClickListener(this)
     }
 
+    /***getting list from previous activity***/
+
     private fun getDataFromPreviousActivity() {
 
-        val bundle = intent.getBundleExtra("Bundle")
-        var question: QuestionAnswers = bundle!!.getParcelable("questionList")!!
+        val bundle = intent.getBundleExtra(NetworkComponents.bundle)
+        topScore = bundle?.getInt(NetworkComponents.topScore, 0)
+        var question: QuestionAnswers = bundle!!.getParcelable(NetworkComponents.questionList)!!
         questionList = question.questionList
 
         setAllViews()
     }
+
+    /***setting view according to
+    1.settingViewVisibility means reset view by-default
+    2.settingDataInViews means setting data in views
+    3.settingProgressBar means setting progress bar ***/
 
     private fun setAllViews() {
         settingViewVisibility()
@@ -115,76 +130,81 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
+    /*** click listeners ***/
+
     override fun onClick(view: View?) {
         when (view?.id) {
 
             R.id.tvAnswerOne -> {
-                checkingTheAnswer("A")
+                checkingTheAnswer(NetworkComponents.optionA)
             }
             R.id.tvAnswerTwo -> {
-                checkingTheAnswer("B")
+                checkingTheAnswer(NetworkComponents.optionB)
             }
             R.id.tvAnswerThree -> {
-                checkingTheAnswer("C")
+                checkingTheAnswer(NetworkComponents.optionC)
             }
             R.id.tvAnswerFour -> {
-                checkingTheAnswer("D")
+                checkingTheAnswer(NetworkComponents.optionD)
             }
             R.id.tvAnswerFive -> {
-                checkingTheAnswer("E")
+                checkingTheAnswer(NetworkComponents.optionE)
             }
         }
     }
+
+    /***check answer is correct or wrong then change background***/
 
     private fun checkingTheAnswer(answer: String) {
         var correctAnswer = questionList[count].correctAnswer
 
         if (correctAnswer?.contains(answer) == true) {
             yScore += questionList[count].score!!
-            changeBackground(answer, "green")
+            changeBackground(answer, NetworkComponents.green)
         } else {
-            changeBackground(correctAnswer!!, "green")
-            changeBackground(answer, "red")
+            changeBackground(correctAnswer!!, NetworkComponents.green)
+            changeBackground(answer, NetworkComponents.red)
         }
     }
 
+    /***setting background resource according to answer***/
 
     private fun changeBackground(answer: String, color: String) {
         when (answer) {
-            "A" -> {
-                if (color.equals("green")) {
+            NetworkComponents.optionA -> {
+                if (color.equals(NetworkComponents.green)) {
                     binding.tvAnswerOne.setBackgroundResource(R.drawable.bg_green)
                 } else {
                     binding.tvAnswerOne.setBackgroundResource(R.drawable.bg_red)
                 }
             }
 
-            "B" -> {
-                if (color.equals("green")) {
+            NetworkComponents.optionB -> {
+                if (color.equals(NetworkComponents.green)) {
                     binding.tvAnswerTwo.setBackgroundResource(R.drawable.bg_green)
                 } else {
                     binding.tvAnswerTwo.setBackgroundResource(R.drawable.bg_red)
                 }
             }
 
-            "C" -> {
-                if (color.equals("green")) {
+            NetworkComponents.optionC -> {
+                if (color.equals(NetworkComponents.green)) {
                     binding.tvAnswerThree.setBackgroundResource(R.drawable.bg_green)
                 } else {
                     binding.tvAnswerThree.setBackgroundResource(R.drawable.bg_red)
                 }
             }
 
-            "D" -> {
-                if (color.equals("green")) {
+            NetworkComponents.optionD -> {
+                if (color.equals(NetworkComponents.green)) {
                     binding.tvAnswerFour.setBackgroundResource(R.drawable.bg_green)
                 } else {
                     binding.tvAnswerFour.setBackgroundResource(R.drawable.bg_red)
                 }
             }
 
-            "E" -> {
-                if (color.equals("green")) {
+            NetworkComponents.optionE -> {
+                if (color.equals(NetworkComponents.green)) {
                     binding.tvAnswerFive.setBackgroundResource(R.drawable.bg_green)
                 } else {
                     binding.tvAnswerFive.setBackgroundResource(R.drawable.bg_red)
@@ -195,12 +215,14 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
         checkingFutureAnswer(color, answer)
     }
 
+    /***checking single or multiple answer choice and decide reset view or still waiting***/
+
     private fun checkingFutureAnswer(color: String, answer: String) {
-        if (questionList[count].type.equals("single-choice")) {
+        if (questionList[count].type.equals(NetworkComponents.single_choice)) {
             waitAndRestart()
             viewClickDisable()
         } else {
-            if (color.equals("green")) {
+            if (color.equals(NetworkComponents.green)) {
                 // answerMultiple.add(answer)
             } else {
                 waitAndRestart()
@@ -209,8 +231,11 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    /***wait 2 second and again enable views and set data ***/
+
     private fun waitAndRestart() {
         counterDownTimer.cancel()
+
         val handlerNew = Handler()
         handlerNew.postDelayed({
             count++
@@ -225,6 +250,7 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
         }, 2000)
     }
 
+    /***enable view option***/
 
     private fun viewClickEnable() {
         binding.tvAnswerOne.isClickable = true
@@ -235,6 +261,8 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
+    /***disable view option***/
+
     private fun viewClickDisable() {
 
         binding.tvAnswerOne.isClickable = false
@@ -244,6 +272,8 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
         binding.tvAnswerFive.isClickable = false
 
     }
+
+    /***view visibilities set***/
 
     private fun settingViewVisibility() {
 
@@ -261,6 +291,8 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
         binding.tvAnswerFive.setBackgroundResource(R.drawable.bg_option)
     }
 
+    /***show dialog when Quiz is finished***/
+
     private fun showDialog() {
 
         val title = getString(R.string.app_name)
@@ -268,22 +300,35 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
             getString(R.string.label_end_question)
         MaterialAlertDialogBuilder(this, R.style.AlertDialogTheme)
             .setTitle(title)
-            .setIcon(R.drawable.ic_launcher_foreground)
             .setMessage(message)
-            .setPositiveButton(
-                getString(R.string.label_restart)
-            ) { dialogInterface, i ->
-
-            }
-            .setNeutralButton(getString(R.string.label_finish)) { _, i ->
+            .setPositiveButton(getString(R.string.label_finish)) { _, i ->
+                updateScoreInRoom(yScore)
                 finish()
             }
             .setCancelable(false)
             .show()
     }
 
+    /***update score in the room***/
+
+    private fun updateScoreInRoom(yScore: Int) {
+        if (yScore > topScore!!) {
+            var topScores = TopScores(1, yScore)
+            mainRoomViewModel.updateSingleScore(topScores)
+        }
+    }
+
+    /***counter down timer cancel when view destroy***/
+
     override fun onDestroy() {
         super.onDestroy()
+        if (counterDownTimer != null) {
+            counterDownTimer.cancel()
+        }
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
         if (counterDownTimer != null) {
             counterDownTimer.cancel()
         }
