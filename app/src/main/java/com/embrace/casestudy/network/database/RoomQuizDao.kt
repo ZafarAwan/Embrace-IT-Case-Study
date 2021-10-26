@@ -1,4 +1,4 @@
-package com.test.newimplementation.Network
+package com.embrace.casestudy.network.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao

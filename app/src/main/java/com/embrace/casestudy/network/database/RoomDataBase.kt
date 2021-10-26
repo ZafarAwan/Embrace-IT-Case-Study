@@ -1,8 +1,7 @@
-package com.test.newimplementation.Network
+package com.embrace.casestudy.network.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import com.embrace.casestudy.model.QuestionAnswerListDB
 import com.embrace.casestudy.model.QuestionListTypeConverter

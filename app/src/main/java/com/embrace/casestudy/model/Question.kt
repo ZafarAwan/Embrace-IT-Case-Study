@@ -10,5 +10,7 @@ data class Question(
     val correctAnswer: String?,
     val questionImageUrl: String?,
     val score: Int?,
-    val type: String?
+    val type: String?,
+    var correctAnswerList: List<String>,
+    var answersList: MutableList<AnswersMap?>
 ) : Parcelable

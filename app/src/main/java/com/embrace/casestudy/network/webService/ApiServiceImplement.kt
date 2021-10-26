@@ -1,4 +1,4 @@
-package com.embrace.casestudy.network
+package com.embrace.casestudy.network.webService
 
 import com.embrace.casestudy.model.QuestionAnswers
 import javax.inject.Inject

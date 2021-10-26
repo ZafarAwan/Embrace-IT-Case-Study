@@ -16,6 +16,7 @@ import com.embrace.casestudy.utils.NetworkComponents
 import com.embrace.casestudy.viewModel.RoomViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Collections.shuffle
 
 @AndroidEntryPoint
 class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
@@ -72,13 +73,18 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
 
         counterDownTimer = object : CountDownTimer(10000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                progressCount += 1
-                binding.progressBar.progress = progressCount
-                binding.progressStatus.text =
-                    "$progressCount / ${binding.progressBar.max}"
+                if (progressCount < 11) {
+                    progressCount += 1
+                    binding.progressBar.progress = progressCount
+                    binding.progressStatus.text =
+                        "$progressCount / ${binding.progressBar.max}"
+                } else {
+                    counterDownTimer.cancel()
+                }
             }
 
             override fun onFinish() {
+                counterDownTimer.cancel()
                 viewClickDisable()
                 waitAndRestart()
             }
@@ -102,30 +108,68 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
                 .into(binding.ivLogo)
         }
 
+        //remove null option data
+        questionList[count].answersList.removeAll(listOf(null))
 
-        questionList[count].answers?.A?.let {
-            binding.tvAnswerOne.visibility = View.VISIBLE
-            binding.tvAnswerOne.text = it
+        //rearrange the answer list every time
+        shuffle(questionList[count].answersList)
+
+        //showing the views according to answer list size
+        when (questionList[count].answersList.size) {
+            2 -> {
+                viewTwoShow()
+            }
+            3 -> {
+                viewThreeShow()
+            }
+            4 -> {
+                viewFourShow()
+            }
+            5 -> {
+                viewFiveShow()
+            }
         }
 
-        questionList[count].answers?.B?.let {
-            binding.tvAnswerTwo.visibility = View.VISIBLE
-            binding.tvAnswerTwo.text = it
-        }
+    }
 
-        questionList[count].answers?.C?.let {
-            binding.tvAnswerThree.visibility = View.VISIBLE
-            binding.tvAnswerThree.text = it
-        }
-
-        questionList[count].answers?.D?.let {
-            binding.tvAnswerFour.visibility = View.VISIBLE
-            binding.tvAnswerFour.text = it
-        }
-
-        questionList[count].answers?.E?.let {
+    private fun viewFiveShow() {
+        viewTwoShow()
+        viewThreeShow()
+        viewFourShow()
+        questionList[count].answersList[4].let {
             binding.tvAnswerFive.visibility = View.VISIBLE
-            binding.tvAnswerFive.text = it
+            binding.tvAnswerFive.text = it?.value.toString()
+        }
+
+    }
+
+    private fun viewFourShow() {
+        viewTwoShow()
+        viewThreeShow()
+        questionList[count].answersList[3].let {
+            binding.tvAnswerFour.visibility = View.VISIBLE
+            binding.tvAnswerFour.text = it?.value.toString()
+        }
+    }
+
+    private fun viewThreeShow() {
+        viewTwoShow()
+        questionList[count].answersList[2].let {
+            binding.tvAnswerThree.visibility = View.VISIBLE
+            binding.tvAnswerThree.text = it?.value.toString()
+        }
+
+    }
+
+    private fun viewTwoShow() {
+        questionList[count].answersList[0].let {
+            binding.tvAnswerOne.visibility = View.VISIBLE
+            binding.tvAnswerOne.text = it?.value.toString()
+        }
+
+        questionList[count].answersList[1].let {
+            binding.tvAnswerTwo.visibility = View.VISIBLE
+            binding.tvAnswerTwo.text = it?.value.toString()
         }
 
     }
@@ -136,41 +180,173 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
         when (view?.id) {
 
             R.id.tvAnswerOne -> {
-                checkingTheAnswer(NetworkComponents.optionA)
+                checkingTheAnswer(
+                    NetworkComponents.optionA,
+                    questionList[count].answersList[0]?.key.toString()
+                )
             }
             R.id.tvAnswerTwo -> {
-                checkingTheAnswer(NetworkComponents.optionB)
+                checkingTheAnswer(
+                    NetworkComponents.optionB,
+                    questionList[count].answersList[1]?.key.toString()
+                )
             }
             R.id.tvAnswerThree -> {
-                checkingTheAnswer(NetworkComponents.optionC)
+                checkingTheAnswer(
+                    NetworkComponents.optionC,
+                    questionList[count].answersList[2]?.key.toString()
+                )
             }
             R.id.tvAnswerFour -> {
-                checkingTheAnswer(NetworkComponents.optionD)
+                checkingTheAnswer(
+                    NetworkComponents.optionD,
+                    questionList[count].answersList[3]?.key.toString()
+                )
             }
             R.id.tvAnswerFive -> {
-                checkingTheAnswer(NetworkComponents.optionE)
+                checkingTheAnswer(
+                    NetworkComponents.optionE,
+                    questionList[count].answersList[4]?.key.toString()
+                )
             }
         }
     }
 
     /***check answer is correct or wrong then change background***/
 
-    private fun checkingTheAnswer(answer: String) {
+    private fun checkingTheAnswer(pos: String, answer: String) {
         var correctAnswer = questionList[count].correctAnswer
 
+        // check single choice or multiple answer if multiple then
+        // divide the score of question divider by multiple choice option size
+
         if (correctAnswer?.contains(answer) == true) {
-            yScore += questionList[count].score!!
-            changeBackground(answer, NetworkComponents.green)
+            yScore += if (!questionList[count].type.equals(NetworkComponents.single_choice)) {
+                (questionList[count].score!! / questionList[count].correctAnswerList.size)
+            } else {
+                questionList[count].score!!
+            }
+
+            changeBackground(answer, NetworkComponents.green, pos)
+            checkingFutureAnswer(NetworkComponents.green, answer)
         } else {
-            changeBackground(correctAnswer!!, NetworkComponents.green)
-            changeBackground(answer, NetworkComponents.red)
+            // if answer is wrong then check the correct answers view position
+            for (i in 0 until questionList[count].answersList.size) {
+                if (correctAnswer!!.contains(questionList[count].answersList[i]?.key.toString())) {
+
+                    when (i) {
+                        0 -> {
+                            setBackgroundResource(
+                                correctAnswer!!,
+                                NetworkComponents.optionA, answer, pos
+                            )
+
+                            break
+                        }
+                        1 -> {
+                            setBackgroundResource(
+                                correctAnswer!!,
+                                NetworkComponents.optionB, answer, pos
+                            )
+                            break
+                        }
+                        2 -> {
+                            setBackgroundResource(
+                                correctAnswer!!,
+                                NetworkComponents.optionC, answer, pos
+                            )
+                            break
+                        }
+                        3 -> {
+                            setBackgroundResource(
+                                correctAnswer!!,
+                                NetworkComponents.optionD, answer, pos
+                            )
+                            break
+                        }
+                        4 -> {
+                            setBackgroundResource(
+                                correctAnswer!!,
+                                NetworkComponents.optionE, answer, pos
+                            )
+                            break
+                        }
+                    }
+                }
+            }
+
         }
+    }
+
+    /******* if single choice then getting view position and update view
+    but if multiple choice then again getting the correct answers views positions and update it *******/
+
+    private fun setBackgroundResource(
+        correctAnswer: String,
+        posCorrect: String,
+        yAnswer: String,
+        posWrong: String
+    ) {
+        changeBackground(yAnswer, NetworkComponents.red, posWrong)
+        if (!questionList[count].type.equals(NetworkComponents.single_choice)) {
+
+            for (i in 0 until questionList[count].answersList.size) {
+                if (correctAnswer!!.contains(questionList[count].answersList[i]?.key.toString())) {
+
+                    when (i) {
+                        0 -> {
+                            changeBackground(
+                                correctAnswer,
+                                NetworkComponents.green,
+                                NetworkComponents.optionA
+                            )
+                        }
+                        1 -> {
+                            changeBackground(
+                                correctAnswer,
+                                NetworkComponents.green,
+                                NetworkComponents.optionB
+                            )
+                        }
+                        2 -> {
+                            changeBackground(
+                                correctAnswer,
+                                NetworkComponents.green,
+                                NetworkComponents.optionC
+                            )
+                        }
+                        3 -> {
+                            changeBackground(
+                                correctAnswer,
+                                NetworkComponents.green,
+                                NetworkComponents.optionD
+                            )
+                        }
+                        4 -> {
+                            changeBackground(
+                                correctAnswer,
+                                NetworkComponents.green,
+                                NetworkComponents.optionE
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            changeBackground(
+                correctAnswer,
+                NetworkComponents.green,
+                posCorrect
+            )
+        }
+
+        checkingFutureAnswer(NetworkComponents.red, yAnswer)
     }
 
     /***setting background resource according to answer***/
 
-    private fun changeBackground(answer: String, color: String) {
-        when (answer) {
+    private fun changeBackground(answer: String, color: String, pos: String) {
+        when (pos) {
             NetworkComponents.optionA -> {
                 if (color.equals(NetworkComponents.green)) {
                     binding.tvAnswerOne.setBackgroundResource(R.drawable.bg_green)
@@ -212,12 +388,12 @@ class QuestionAnswerActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
 
-        checkingFutureAnswer(color, answer)
     }
 
     /***checking single or multiple answer choice and decide reset view or still waiting***/
 
     private fun checkingFutureAnswer(color: String, answer: String) {
+        binding.tvYScore.text = "$yScore"
         if (questionList[count].type.equals(NetworkComponents.single_choice)) {
             waitAndRestart()
             viewClickDisable()

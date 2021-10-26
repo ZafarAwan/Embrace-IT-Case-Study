@@ -3,15 +3,13 @@ package com.embrace.casestudy.ui
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.embrace.casestudy.R
 import com.embrace.casestudy.databinding.ActivityMainBinding
-import com.embrace.casestudy.model.Question
-import com.embrace.casestudy.model.QuestionAnswerListDB
-import com.embrace.casestudy.model.QuestionAnswers
-import com.embrace.casestudy.model.TopScores
+import com.embrace.casestudy.model.*
 import com.embrace.casestudy.utils.ApiState
 import com.embrace.casestudy.utils.NetworkComponents
 import com.embrace.casestudy.viewModel.MainViewModel
@@ -35,19 +33,17 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //getting question list from server or from room
         mainRoomViewModel.questionList.observe(this) {
             if (it == null) {
-                if (NetworkComponents.DETECT_INTERNET_CONNECTION(this)) {
-                    mainViewModel.getQuestionList()
-                } else {
-                    NetworkComponents.showDialog(this)
-                }
+                callWebServiceForQuestionList()
             } else {
                 var questionAnswers = QuestionAnswers(it.questionList)
                 question = questionAnswers
             }
         }
 
+        //getting Top scores from room
         mainRoomViewModel.topScores.observe(this) {
             if (it == null) {
                 var topString = TopScores(0, 0)
@@ -62,19 +58,22 @@ class MainActivity : AppCompatActivity() {
             mainViewModel._questionStateFlow.collect {
                 when (it) {
                     is ApiState.Loading -> {
-
+                        binding.btnStart.isClickable = false
+                        binding.progressBarCircle.visibility = View.VISIBLE
                     }
                     is ApiState.Failure -> {
-
+                        binding.btnStart.isClickable = true
+                        binding.progressBarCircle.visibility = View.GONE
                         Log.e("TAG", "onCreate: " + it.msg)
                     }
                     is ApiState.Success -> {
+                        binding.btnStart.isClickable = true
+                        binding.progressBarCircle.visibility = View.GONE
                         question = it.data
-                        addDataInRoomDataBase(it.data.questionList)
+                        settingAnswerList()
 
                     }
                     is ApiState.Empty -> {
-
                     }
                 }
             }
@@ -83,25 +82,70 @@ class MainActivity : AppCompatActivity() {
         initMainView()
     }
 
+    /***** calling webservice for getting Question List if internet is available  *****/
+    private fun callWebServiceForQuestionList() {
+        if (NetworkComponents.DETECT_INTERNET_CONNECTION(this)) {
+            mainViewModel.getQuestionList()
+        } else {
+            NetworkComponents.showDialog(this)
+        }
+    }
+
+    /***** add question list in the Room Data Base  *****/
+
     private fun addDataInRoomDataBase(questionList: List<Question>) {
         var questionAnswerListDB = QuestionAnswerListDB(0, questionList)
         mainRoomViewModel.insertAll(questionAnswerListDB)
     }
 
+    /***** sending data from one activity to another  *****/
     private fun initMainView() {
         binding.tvTitle.text = resources.getString(R.string.app_name)
         scoreViewUpdate()
 
         binding.btnStart.setOnClickListener {
-            val intent = Intent(this, QuestionAnswerActivity::class.java)
-            val bundle = Bundle()
-            bundle.putParcelable(NetworkComponents.questionList, question)
-            bundle.putInt(NetworkComponents.topScore, topScores)
-            intent.putExtra(NetworkComponents.bundle, bundle)
+            if (question?.questionList?.isNotEmpty()) {
+                val intent = Intent(this, QuestionAnswerActivity::class.java)
+                val bundle = Bundle()
+                bundle.putParcelable(NetworkComponents.questionList, question)
+                bundle.putInt(NetworkComponents.topScore, topScores)
+                intent.putExtra(NetworkComponents.bundle, bundle)
 
-            startActivity(intent)
+                startActivity(intent)
+            } else {
+                callWebServiceForQuestionList()
+            }
         }
     }
+
+    /***** rearrange the list according to desire requirement  *****/
+    private fun settingAnswerList() {
+
+        for (item in question.questionList) {
+            item.answersList = arrayListOf(
+                item.answers?.A?.let {
+                    AnswersMap(NetworkComponents.optionA, item.answers?.A!!)
+                },
+                item.answers?.B?.let {
+                    AnswersMap(NetworkComponents.optionB, item.answers?.B!!)
+                },
+                item.answers?.C?.let {
+                    AnswersMap(NetworkComponents.optionC, item.answers?.C!!)
+                },
+                item.answers?.D?.let {
+                    AnswersMap(NetworkComponents.optionD, item.answers?.D!!)
+                },
+                item.answers?.E?.let {
+                    AnswersMap(NetworkComponents.optionE, item.answers?.E!!)
+                }
+            )!!
+
+
+            item.correctAnswerList = item.correctAnswer?.split(",")?.toList()!!
+        }
+        addDataInRoomDataBase(question.questionList)
+    }
+
 
     private fun scoreViewUpdate() {
         binding.tvHighScores.text = "$topScores"

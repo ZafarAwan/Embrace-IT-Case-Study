@@ -13,7 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.CaseStudy">
-        <activity android:name=".ui.MainActivity">
+        <activity
+            android:name=".ui.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -21,7 +23,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.QuestionAnswerActivity"/>
+        <activity
+            android:name=".ui.QuestionAnswerActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

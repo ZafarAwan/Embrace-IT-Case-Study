@@ -2,7 +2,7 @@ package com.embrace.casestudy.repository
 
 import com.embrace.casestudy.model.QuestionAnswerListDB
 import com.embrace.casestudy.model.TopScores
-import com.test.newimplementation.Network.RoomQuizDao
+import com.embrace.casestudy.network.database.RoomQuizDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

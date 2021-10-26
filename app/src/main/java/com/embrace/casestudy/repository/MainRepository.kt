@@ -1,7 +1,7 @@
 package com.embrace.casestudy.repository
 
 import com.embrace.casestudy.model.QuestionAnswers
-import com.embrace.casestudy.network.ApiServiceImplement
+import com.embrace.casestudy.network.webService.ApiServiceImplement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

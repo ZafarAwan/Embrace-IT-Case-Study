@@ -2,10 +2,10 @@ package com.embrace.casestudy.di
 
 import android.content.Context
 import androidx.room.Room
-import com.embrace.casestudy.network.ApiService
+import com.embrace.casestudy.network.webService.ApiService
 import com.embrace.casestudy.utils.NetworkComponents
-import com.test.newimplementation.Network.RoomDataBase
-import com.test.newimplementation.Network.RoomQuizDao
+import com.embrace.casestudy.network.database.RoomDataBase
+import com.embrace.casestudy.network.database.RoomQuizDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
